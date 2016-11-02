@@ -1,6 +1,9 @@
 #include "sphere.hpp"
-
+#include "program.hpp"
 // Creates a VAO containing a sphere with a resolution specified by slices and layers, with a radius of 1.
+
+
+
 
 unsigned int createCircleVAO(unsigned int slices, unsigned int layers) {
 
@@ -14,10 +17,10 @@ unsigned int createCircleVAO(unsigned int slices, unsigned int layers) {
 	const unsigned int COMPONENTS_PER_VERTEX = 3;
 	int vertLen = triangleCount * VERTICES_PER_TRIANGLE * COMPONENTS_PER_VERTEX;
 	float* vertices = new float[vertLen]; // Vertice count
-	int indLen = triangleCount * VERTICES_PER_TRIANGLE
+	int indLen = triangleCount * VERTICES_PER_TRIANGLE;
 	unsigned int* indices = new unsigned int[indLen];
 	int colorsLen = triangleCount * VERTICES_PER_TRIANGLE * 4;
-	float* colors = new flaot[colorsLen] // Times 4 as we av RGBA
+	float* colors = new float[colorsLen]; // Times 4 as we av RGBA
 	// Slices require us to define a full revolution worth of triangles.
 	// Layers only requires angle varying between the bottom and the top (a layer only covers half a circle worth of angles)
 	const float degreesPerLayer = 180.0 / (float) layers;
@@ -66,9 +69,10 @@ unsigned int createCircleVAO(unsigned int slices, unsigned int layers) {
 			vertices[3 * i + 0] = radius * currentDirectionX;
 			vertices[3 * i + 1] = radius * currentDirectionY;
 			vertices[3 * i + 2] = currentZ;
-			colors[3 * i + 0] = 1 * currentDirectionX;
-			colors[3 * i + 1] = 1 * currentDirectionX;
-			colors[3 * i + 2] = 1 * currentDirectionX;
+			colors[4 * i + 0] = currentDirectionX;
+			colors[4 * i + 1] = 0;
+			colors[4 * i + 2] = 0;
+			colors[4 * i + 3] = 1;
 
 			indices[i] = i;
 			i++;
@@ -76,9 +80,10 @@ unsigned int createCircleVAO(unsigned int slices, unsigned int layers) {
 			vertices[3 * i + 0] = radius * nextDirectionX;
 			vertices[3 * i + 1] = radius * nextDirectionY;
 			vertices[3 * i + 2] = currentZ;
-			colors[3 * i + 0] = 1 * currentDirectionY;
-			colors[3 * i + 1] = 1 * currentDirectionY;
-			colors[3 * i + 2] = 1 * currentDirectionY;
+			colors[4 * i + 0] = 0;
+			colors[4 * i + 1] = currentDirectionX;
+			colors[4 * i + 2] = 0;
+			colors[4 * i + 3] = 1;
 
 			indices[i] = i;
 			i++;
@@ -86,9 +91,11 @@ unsigned int createCircleVAO(unsigned int slices, unsigned int layers) {
 			vertices[3 * i + 0] = nextRadius * nextDirectionX;
 			vertices[3 * i + 1] = nextRadius * nextDirectionY;
 			vertices[3 * i + 2] = nextZ;
-			colors[3 * i + 0] = 1 * currentZ;
-			colors[3 * i + 1] = 1 * currentZ;
-			colors[3 * i + 2] = 1 * currentZ;
+			colors[4 * i + 0] = 0;
+			colors[4 * i + 1] = 1- currentDirectionY;
+			colors[4 * i + 2] = currentDirectionX;
+			colors[4 * i + 3] = 1;
+
 			indices[i] = i;
 			i++;
 
@@ -97,27 +104,33 @@ unsigned int createCircleVAO(unsigned int slices, unsigned int layers) {
 			vertices[3 * i + 0] = radius * currentDirectionX;
 			vertices[3 * i + 1] = radius * currentDirectionY;
 			vertices[3 * i + 2] = currentZ;
-			colors[3 * i + 0] = currentDirectionY;
-			colors[3 * i + 1] = 0;
-			colors[3 * i + 2] = 0;
+			colors[4 * i + 0] = 0;
+			colors[4 * i + 1] = 0;
+			colors[4 * i + 2] = 1- currentDirectionY;
+			colors[4 * i + 3] = 1;
+
 			indices[i] = i;
 			i++;
 
 			vertices[3 * i + 0] = nextRadius * nextDirectionX;
 			vertices[3 * i + 1] = nextRadius * nextDirectionY;
 			vertices[3 * i + 2] = nextZ;
-			colors[3 * i + 0] = 0;
-			colors[3 * i + 1] = currentDirectionX;
-			colors[3 * i + 2] = 0;
+			colors[4 * i + 0] = 1;
+			colors[4 * i + 1] = currentDirectionY;
+			colors[4 * i + 2] = 0;
+			colors[4 * i + 3] = 1;
+
 			indices[i] = i;
 			i++;
 
 			vertices[3 * i + 0] = nextRadius * currentDirectionX;
 			vertices[3 * i + 1] = nextRadius * currentDirectionY;
 			vertices[3 * i + 2] = nextZ;
-			colors[3 * i + 0] = 0;
-			colors[3 * i + 1] = 0;
-			colors[3 * i + 2] = currentZ;
+			colors[4 * i + 0] = currentDirectionY;
+			colors[4 * i + 1] = 0;
+			colors[4 * i + 2] = 1;
+			colors[4 * i + 3] = 1;
+
 			indices[i] = i;
 			i++;
 		}
@@ -126,8 +139,8 @@ unsigned int createCircleVAO(unsigned int slices, unsigned int layers) {
 	// Sending the created buffers over to OpenGL.
 	// Don't forget to modify this to fit the function you created yourself!
 	// You will have to include a file which contains the implementation of this function for this to work.
-	// unsigned int generateVertexArray(float* vertices, unsigned int* indices, float* colors, int vertLen, int indLen, int colorsLen)
-	unsigned int vao_id = generateVertexArray(vertices, indices, colors, vertLen, indLen, colorsLen);
+	// createVAO(float* vertices, int vertLen, unsigned int* indices, int indLen, float* colors, int colorsLen)
+	unsigned int vao_id = createVAO(vertices, vertLen, indices, indLen, colors, colorsLen);
 
 	// Cleaning up after ourselves
 	delete[] vertices;

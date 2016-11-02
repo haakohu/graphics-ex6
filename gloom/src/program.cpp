@@ -13,6 +13,7 @@ float horRotate = 0.0;
 float verRotate = 0.0;
 
 
+
 void setup(GLFWwindow* window){
   glfwSetKeyCallback(window, keyboardCallback);
   glEnable(GL_DEPTH_TEST);
@@ -22,55 +23,14 @@ void setup(GLFWwindow* window){
   printGLError();
 }
 void runProgram(GLFWwindow* window){
+
   setup(window);
-  unsigned int slices = 2;
-  unsigned int layers = 2;
-  float vertices[] = {
-    -1.000f, -1.00f, 0.0f,
-		 0.000f, -1.00f, 0.0f,
-		 1.000f, -1.00f, 0.0f,
-		-0.500f,  0.00f, 0.0f,
-		 0.500f,  0.00f, 0.0f,
-		 0.000f,  1.00f, 0.0f,
-		-0.250f, -0.50f, 0.0f,
-		 0.000f, -0.50f, 0.0f,
-		 0.250f, -0.50f, 0.0f,
-		-0.125f, -0.25f, 0.0f,
-		 0.125f, -0.25f, 0.0f,
-     0.000f, 0.00f, 0.0f,
-  };
-  float colors[] = {
-    0.583f, 0.771f, 0.014f,1.0f,
-		0.609f, 0.115f, 0.436f,1.0f,
-		0.327f, 0.483f, 0.844f,1.0f,
-		0.822f, 0.569f, 0.201f,1.0f,
-		0.435f, 0.602f, 0.223f,1.0f,
-		0.597f, 0.770f, 0.761f,1.0f,
-		0.559f, 0.436f, 0.730f,1.0f,
-		0.359f, 0.583f, 0.152f,1.0f,
-		0.327f, 0.483f, 0.844f,1.0f,
-		0.559f, 0.861f, 0.639f,1.0f,
-		1.000f, 1.000f, 1.000f,1.0f,
-    0.195f, 0.548f, 0.859f, 1.0f
-  };
-  unsigned int indices[] = {
-    0, 1, 3,
-		1, 2, 4,
-		3, 4, 5,
-		6, 7, 9,
-		7, 8, 10,
-    9, 10, 11
-  };
-  float transform[4][4] = {
-    1.0,0.0,0.0,0.0,
-    0.0,1.0,0.0,0.0,
-    0.0,0.0,1.0,0.0,
-    0.0,0.0,0.0,1.0,
-  };
-  int vertLen = 3*12;
-  int indLen = 3*6;
-  int colorsLen = 4*12;
-  unsigned int vaoid = createVAO(vertices,vertLen,indices,indLen,colors,colorsLen);
+  int slices = 10;
+  int layers = 10;
+  int PRIMITIVES_PER_RECTANGLE = 2;
+  int VERTICES_PER_TRIANGLE = 3;
+  int vaoid = createCircleVAO(slices,layers);
+  int indLen = slices * layers * PRIMITIVES_PER_RECTANGLE * VERTICES_PER_TRIANGLE;
   Gloom::Shader shader;
   shader.makeBasicShader("/home/shomec/h/haakohu/Documents/programmering/tdt4195/graphics/ov4/gloom/gloom/shaders/simple.vert","/home/shomec/h/haakohu/Documents/programmering/tdt4195/graphics/ov4/gloom/gloom/shaders/simple.frag");
 
@@ -94,6 +54,78 @@ void runProgram(GLFWwindow* window){
       glfwPollEvents();
       glfwSwapBuffers(window);
   }
+}
+
+void runProgram2(GLFWwindow* window){
+    setup(window);
+    int slices = 40;
+    int layers = 40;
+    int PRIMITIVES_PER_RECTANGLE = 2;
+    int VERTICES_PER_TRIANGLE = 3;
+    int vaoid = createCircleVAO(slices,layers);
+    int indLen = slices * layers * PRIMITIVES_PER_RECTANGLE * VERTICES_PER_TRIANGLE;
+    Gloom::Shader shader;
+    shader.makeBasicShader("/home/shomec/h/haakohu/Documents/programmering/tdt4195/graphics/ov4/gloom/gloom/shaders/simple.vert","/home/shomec/h/haakohu/Documents/programmering/tdt4195/graphics/ov4/gloom/gloom/shaders/simple.frag");
+
+    while (!glfwWindowShouldClose(window))
+    {
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glm::mat4 view = glm::rotate(glm::mat4(1.f), horRotate, glm::vec3(0,1,0));
+        view = glm::rotate(view,verRotate, glm::vec3(1,0,0));
+        view = glm::translate(view,-cameraPosition);
+
+        glm::mat4x4 projection = glm::perspective(glm::radians(45.f),1.f,1.f,100.f);
+        //glm::mat4x4 projection = glm::perspective(45.f,1.f, 1.f,100.f);
+        glm::mat4x4 transform2 = projection*view;
+        // Draw your scene here
+        shader.activate();
+        glBindVertexArray(vaoid);
+        glUniformMatrix4fv(3,1,GL_FALSE,&transform2[0][0]);
+        glDrawElements(GL_TRIANGLES, indLen, GL_UNSIGNED_INT,0);
+        shader.deactivate();
+
+        glfwPollEvents();
+        glfwSwapBuffers(window);
+    }
+}
+
+void updatePlanet(SceneNode* planet,float timeDelta,glm::mat4 oldMat){
+    if(timeDelta == NULL){
+      timeDelta = getTimeDeltaSeconds();
+      oldMat = glm::mat4(1);
+    }
+    float moved = planet->rotationSpeedRadians * timeDelta;
+    glm::vec3 rotationVector = planet->rotationDirection;
+    glm::mat4 rotationDirection = glm::mat4(1);
+    rotationDirection[0][0] = rotationVector.x;
+    rotationDirection[1][1] = rotationVector.y;
+    rotationDirection[2][2] = rotationVector.z;
+    glm::mat4 transMat = moved * oldMat * rotationDirection;
+    planet->currentTransformationMatrix = transMat;
+    for(int i = 0; planet->children[i] != 0 ; i++){
+      updatePlanet(planet->children[i],timeDelta,transMat);
+    }
+
+
+}
+
+// Man ganger det på bunnen først, altså tærne LOL
+
+SceneNode* generateSystem(){
+  SceneNode* sun = createSceneNode();
+  SceneNode* moon = createSceneNode();
+  SceneNode* planet = createSceneNode();
+  addChild(sun,planet);
+  addChild(planet,moon);
+  sun->rotationSpeedRadians = 1;
+  sun->rotationDirection = glm::vec3(0,1,0);
+  moon->rotationSpeedRadians = 3;
+  moon->rotationDirection = glm::vec3(1,0,0);
+  planet->rotationDirection = glm::vec3(0.5,0.5,0);
+  planet->rotationSpeedRadians = 2;
+  return sun;
+
+
 }
 
 unsigned int createVAO(float* vertices, int vertLen, unsigned int* indices, int indLen, float* colors, int colorsLen){

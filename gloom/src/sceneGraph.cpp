@@ -87,15 +87,15 @@ void printNode(SceneNode* node) {
 // we keep track here with a global variable whether this has happened previously.
 bool isRandomInitialised = false;
 
-float random2() {
-	if (!isRandomInitialised) {
+//float random() {
+//	if (!isRandomInitialised) {
 		// Initialise the random number generator using the current time as a seed
-		srand(static_cast <unsigned> (time(0)));
-		isRandomInitialised = true;
-	}
+//		srand(static_cast <unsigned> (time(0)));
+//		isRandomInitialised = true;
+//	}
 	// rand() produces a random integer between 0 and RAND_MAX. This normalises it to a number between 0 and 1.
-	return static_cast <float> (rand()) / static_cast <float>(RAND_MAX);
-}
+//	return static_cast <float> (rand()) / static_cast <float>(RAND_MAX);
+//}
 
 // In order to be able to calculate when the getTimeDeltaSeconds() function was last called, we need to know the point in time when that happened. This requires us to keep hold of that point in time.
 // We initialise this value to the time at the start of the program.

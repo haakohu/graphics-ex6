@@ -7,9 +7,11 @@
 #include <GLFW/glfw3.h>
 #include <glad/glad.h>
 #include <string>
+#include <sceneGraph.hpp>
 
 unsigned int createCircleVAO(unsigned int slices, unsigned int layers);
-
+void runOv4(GLFWwindow* window);
+SceneNode* generateSystem();
 // Main OpenGL program
 void runProgram(GLFWwindow* window);
 void setup(GLFWwindow* window);

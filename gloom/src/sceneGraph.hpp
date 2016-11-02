@@ -63,7 +63,7 @@ void addChild(SceneNode* parent, SceneNode* child);
 void printNode(SceneNode* node);
 
 // Utility functions
-float random2();
+//float random();
 double getTimeDeltaSeconds();
 float toRadians(float angleDegrees);
 
