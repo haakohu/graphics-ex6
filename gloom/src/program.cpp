@@ -66,7 +66,7 @@ void runProgram2(GLFWwindow* window){
     int indLen = slices * layers * PRIMITIVES_PER_RECTANGLE * VERTICES_PER_TRIANGLE;
     Gloom::Shader shader;
     shader.makeBasicShader("/home/shomec/h/haakohu/Documents/programmering/tdt4195/graphics/ov4/gloom/gloom/shaders/simple.vert","/home/shomec/h/haakohu/Documents/programmering/tdt4195/graphics/ov4/gloom/gloom/shaders/simple.frag");
-
+    SceneNode* mainPlanet = generateSystem();
     while (!glfwWindowShouldClose(window))
     {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -79,7 +79,7 @@ void runProgram2(GLFWwindow* window){
         glm::mat4x4 transform2 = projection*view;
         // Draw your scene here
         shader.activate();
-        glBindVertexArray(vaoid);
+        glBindVertexArray(mainPlanet->vertexArrayObjectID);
         glUniformMatrix4fv(3,1,GL_FALSE,&transform2[0][0]);
         glDrawElements(GL_TRIANGLES, indLen, GL_UNSIGNED_INT,0);
         shader.deactivate();
@@ -123,9 +123,13 @@ SceneNode* generateSystem(){
   moon->rotationDirection = glm::vec3(1,0,0);
   planet->rotationDirection = glm::vec3(0.5,0.5,0);
   planet->rotationSpeedRadians = 2;
+  int slices = 40;
+  int layers = 40;
+  int PRIMITIVES_PER_RECTANGLE = 2;
+  int VERTICES_PER_TRIANGLE = 3;
+  int vaoid = createCircleVAO(slices,layers);
+  planet->vertexArrayObjectID = vaoid;
   return sun;
-
-
 }
 
 unsigned int createVAO(float* vertices, int vertLen, unsigned int* indices, int indLen, float* colors, int colorsLen){
