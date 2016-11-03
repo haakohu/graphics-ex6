@@ -41,9 +41,9 @@ void printMatrix(glm::mat4 matrix) {
 // Values are initialised because otherwise they may contain garbage memory.
 SceneNode* createSceneNode() {
 	SceneNode* node = new SceneNode;
-	node->rotationX = 0;
-	node->rotationY = 0;
-	node->rotationZ = 0;
+	node->rotationPos = 0;
+	node->selfRotationPos = 0;
+	node->selfRotationSpeed = 1;
 	node->x = 0;
 	node->y = 0;
 	node->z = 0;
@@ -64,7 +64,6 @@ void printNode(SceneNode* node) {
 	printf(
 		"SceneNode {\n"
 		"    Child count: %i\n"
-		"    Rotation: (%f, %f, %f)\n"
 		"    Location: (%f, %f, %f)\n"
 		"    Scale: %f\n"
 		"    Rotation Speed: %f\n"
@@ -72,7 +71,6 @@ void printNode(SceneNode* node) {
 		"    VAO ID: %i\n"
 		"}\n",
 		node->children.size(),
-		node->rotationX, node->rotationY, node->rotationZ,
 		node->x, node->y, node->z,
 		node->scaleFactor,
 		node->rotationSpeedRadians,

@@ -37,8 +37,9 @@ typedef struct SceneNode {
 	std::vector<SceneNode*> children;
 
 	// The node's rotation relative to its parent
-	float rotationX, rotationY, rotationZ;
-
+	float rotationPos;
+	float selfRotationPos;
+	float selfRotationSpeed;
 	// The node's position relative to its parent
 	float x, y, z;
 
