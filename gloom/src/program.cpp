@@ -9,7 +9,7 @@
 #include "glm/vec3.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 
-glm::vec3 cameraPosition = glm::vec3(0,0,10);
+glm::vec3 cameraPosition = glm::vec3(0,0,20);
 float horRotate = 0.0;
 float verRotate = 0.0;
 
@@ -96,48 +96,37 @@ void runProgram2(GLFWwindow* window){
 }
 
 void renderPlanet(SceneNode* planet, glm::mat4 vp, std::stack<glm::mat4>* stack, int indLen){
-  glm::mat4 model = planet-> currentTransformationMatrix * peekMatrix(stack);
-  pushMatrix(stack, model);
+  glm::mat4 model = planet-> currentTransformationMatrix * glm::scale(glm::vec3(planet->scaleFactor));
   glBindVertexArray(planet->vertexArrayObjectID);
   glm::mat4 mvp = vp * model;
-  printMatrix(vp);
-  printf("==\n");
-  printMatrix(model);
-  printf("=======\n");
+  printf("Child count: %i\n", planet->rotationX);
   glUniformMatrix4fv(3,1,GL_FALSE,&mvp[0][0]);
   glDrawElements(GL_TRIANGLES,indLen,GL_UNSIGNED_INT,0);
   for(int i= 0; i < planet->children.size(); i++){
     renderPlanet(planet->children[i],vp,stack, indLen);
   }
-  popMatrix(stack);
-
 }
 
 void updatePlanet(SceneNode* planet,float timeDelta,glm::mat4 oldMat){
-  float angle = toRadians(timeDelta) ;
-  glm::mat3 W = {
-    0, -planet->rotationDirection.z, planet->rotationDirection.y,
-    planet->rotationDirection.z, 0, - planet->rotationDirection.x,
-    - planet->rotationDirection.y, planet->rotationDirection.x,0
-  };
-  // 2 * pow(sin(angle/2),2, sin(angle) *
-
-  glm::mat3 W2 = glm::mat3(1) + glm::mat3(sin(angle)) * W +  glm::mat3(2 * pow(sin(angle/2),2))*  W * W;
-  glm::vec3 newCordinate= glm::vec3(planet->x,planet->y,planet->z) + glm::mat3(0.001) * W2 * glm::vec3(1);
-  planet->x = newCordinate.x;
-  planet->y = newCordinate.y;
-  planet->z = newCordinate.z;
+  planet->rotationX += timeDelta * planet->rotationSpeedRadians;
+  //planet->rotationY += timeDelta * planet->rotationSpeedRadians;
+  glm::mat4 view = glm::mat4(1);
+  glm::vec3 pek = glm::vec3(planet->x, planet->y, planet->z);
+  glm::vec3 T = glm::cross(pek, glm::vec3(0,0,1));
+  //view = glm::rotate(view,planet->rotationY,glm::vec3(1,0,0)); // Rotere rundt x -akse
+  view = glm::rotate(view,planet->rotationX,T); // Rotere rundt y - akse
+  //view = glm::rotate(view,planet->rotationZ, glm::vec3(0,0,1));
   glm::mat4 matrix = glm::mat4(1);
   matrix[3][0] = planet->x;
   matrix[3][1] = planet->y;
   matrix[3][2] = planet->z;
-  glm::mat4 transMat = oldMat * matrix;
+  glm::mat4 scale = glm::mat4(planet->scaleFactor);
+  // Rotere rundt y - akse
+  glm::mat4 transMat = oldMat * view * matrix;
   planet->currentTransformationMatrix = transMat;
   for(int i = 0; i < planet->children.size() ; i++){
     updatePlanet(planet->children[i],timeDelta,transMat);
   }
-
-
 }
 
 SceneNode* generateSystem(int slices, int layers){
@@ -146,12 +135,20 @@ SceneNode* generateSystem(int slices, int layers){
   SceneNode* planet = createSceneNode();
   addChild(sun,planet);
   addChild(planet,moon);
-  sun->rotationSpeedRadians = 1;
-  sun->rotationDirection = glm::vec3(0,1,0);
-  moon->rotationSpeedRadians = 3;
+  sun->rotationSpeedRadians = 0;
+  sun->rotationDirection = glm::vec3(0,0,0);
+  sun->y = 1;
+  moon->rotationSpeedRadians = 0.5;
+  moon->x = 1;
+  moon->y = 1;
+  moon->scaleFactor = 0.2;
   moon->rotationDirection = glm::vec3(1,0,0);
   planet->rotationDirection = glm::vec3(0.5,0.5,0);
-  planet->rotationSpeedRadians = 2;
+  planet->x = 5;
+  planet->scaleFactor= 0.5;
+  planet->y = 4;
+  planet->z = 0;
+  planet->rotationSpeedRadians = 1;
   planet->vertexArrayObjectID = createCircleVAO(slices,layers,0,0,1);
   sun->vertexArrayObjectID = createCircleVAO(slices,layers,1,0,0);
   moon->vertexArrayObjectID = createCircleVAO(slices,layers,0,1,0);
