@@ -8,14 +8,16 @@
 #include <glad/glad.h>
 #include <string>
 #include <sceneGraph.hpp>
-
-unsigned int createCircleVAO(unsigned int slices, unsigned int layers);
+#include <sphere.hpp>
 void runOv4(GLFWwindow* window);
-SceneNode* generateSystem();
+SceneNode* generateSystem(int slices, int layers);
 // Main OpenGL program
 void runProgram(GLFWwindow* window);
+void runProgram2(GLFWwindow* window);
 void setup(GLFWwindow* window);
 unsigned int createVAO(float* vertices, int vertLen, unsigned int* indices, int indLen, float* colors, int colorsLen);
+void renderPlanet(SceneNode* planet, glm::mat4 vp, std::stack<glm::mat4>* stack, int indLen);
+void updatePlanet(SceneNode* planet,float timeDelta,glm::mat4 oldMat);
 // GLFW callback mechanisms
 void keyboardCallback(GLFWwindow* window, int key, int scancode,
                       int action, int mods);

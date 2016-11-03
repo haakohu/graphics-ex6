@@ -73,7 +73,7 @@ int main(int argc, char* argb[])
     GLFWwindow* window = initialise();
 
     // Run an OpenGL application using this window
-    runProgram(window);
+    runProgram2(window);
 
     // Terminate GLFW (no need to call glfwDestroyWindow)
     glfwTerminate();

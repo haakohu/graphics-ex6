@@ -1,3 +1,4 @@
+
 // Local headers
 #include "program.hpp"
 #include "gloom/gloom.hpp"
@@ -8,7 +9,7 @@
 #include "glm/vec3.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 
-glm::vec3 cameraPosition = glm::vec3(0,0,5);
+glm::vec3 cameraPosition = glm::vec3(0,0,10);
 float horRotate = 0.0;
 float verRotate = 0.0;
 
@@ -25,11 +26,11 @@ void setup(GLFWwindow* window){
 void runProgram(GLFWwindow* window){
 
   setup(window);
-  int slices = 10;
-  int layers = 10;
+  int slices = 900;
+  int layers = 900;
   int PRIMITIVES_PER_RECTANGLE = 2;
   int VERTICES_PER_TRIANGLE = 3;
-  int vaoid = createCircleVAO(slices,layers);
+  int vaoid = createCircleVAO(slices,layers,0,1,1);
   int indLen = slices * layers * PRIMITIVES_PER_RECTANGLE * VERTICES_PER_TRIANGLE;
   Gloom::Shader shader;
   shader.makeBasicShader("/home/shomec/h/haakohu/Documents/programmering/tdt4195/graphics/ov4/gloom/gloom/shaders/simple.vert","/home/shomec/h/haakohu/Documents/programmering/tdt4195/graphics/ov4/gloom/gloom/shaders/simple.frag");
@@ -62,11 +63,10 @@ void runProgram2(GLFWwindow* window){
     int layers = 40;
     int PRIMITIVES_PER_RECTANGLE = 2;
     int VERTICES_PER_TRIANGLE = 3;
-    int vaoid = createCircleVAO(slices,layers);
     int indLen = slices * layers * PRIMITIVES_PER_RECTANGLE * VERTICES_PER_TRIANGLE;
     Gloom::Shader shader;
     shader.makeBasicShader("/home/shomec/h/haakohu/Documents/programmering/tdt4195/graphics/ov4/gloom/gloom/shaders/simple.vert","/home/shomec/h/haakohu/Documents/programmering/tdt4195/graphics/ov4/gloom/gloom/shaders/simple.frag");
-    SceneNode* mainPlanet = generateSystem();
+    SceneNode* mainPlanet = generateSystem(slices,layers);
     while (!glfwWindowShouldClose(window))
     {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -76,42 +76,71 @@ void runProgram2(GLFWwindow* window){
 
         glm::mat4x4 projection = glm::perspective(glm::radians(45.f),1.f,1.f,100.f);
         //glm::mat4x4 projection = glm::perspective(45.f,1.f, 1.f,100.f);
-        glm::mat4x4 transform2 = projection*view;
+        glm::mat4x4 vp = projection*view;
         // Draw your scene here
         shader.activate();
-        glBindVertexArray(mainPlanet->vertexArrayObjectID);
-        glUniformMatrix4fv(3,1,GL_FALSE,&transform2[0][0]);
-        glDrawElements(GL_TRIANGLES, indLen, GL_UNSIGNED_INT,0);
+        // glBindVertexArray(mainPlanet->vertexArrayObjectID);
+        // glUniformMatrix4fv(3,1,GL_FALSE,&transform2[0][0]);
+        // glDrawElements(GL_TRIANGLES, indLen, GL_UNSIGNED_INT,0);
+        // glBindVertexArray(mainPlanet->children[0]->vertexArrayObjectID);
+        // glUniformMatrix4fv(3,1,GL_FALSE,&transform2[0][0]);
+        // glDrawElements(GL_TRIANGLES, indLen, GL_UNSIGNED_INT,0);
+        updatePlanet(mainPlanet,getTimeDeltaSeconds(),glm::mat4x4(1));
+        std::stack<glm::mat4>* stack =  createEmptyMatrixStack();
+        pushMatrix(stack,glm::mat4(1));
+        renderPlanet(mainPlanet,vp,stack, indLen);
         shader.deactivate();
-
         glfwPollEvents();
         glfwSwapBuffers(window);
     }
 }
 
+void renderPlanet(SceneNode* planet, glm::mat4 vp, std::stack<glm::mat4>* stack, int indLen){
+  glm::mat4 model = planet-> currentTransformationMatrix * peekMatrix(stack);
+  pushMatrix(stack, model);
+  glBindVertexArray(planet->vertexArrayObjectID);
+  glm::mat4 mvp = vp * model;
+  printMatrix(vp);
+  printf("==\n");
+  printMatrix(model);
+  printf("=======\n");
+  glUniformMatrix4fv(3,1,GL_FALSE,&mvp[0][0]);
+  glDrawElements(GL_TRIANGLES,indLen,GL_UNSIGNED_INT,0);
+  for(int i= 0; i < planet->children.size(); i++){
+    renderPlanet(planet->children[i],vp,stack, indLen);
+  }
+  popMatrix(stack);
+
+}
+
 void updatePlanet(SceneNode* planet,float timeDelta,glm::mat4 oldMat){
-    if(timeDelta == NULL){
-      timeDelta = getTimeDeltaSeconds();
-      oldMat = glm::mat4(1);
-    }
-    float moved = planet->rotationSpeedRadians * timeDelta;
-    glm::vec3 rotationVector = planet->rotationDirection;
-    glm::mat4 rotationDirection = glm::mat4(1);
-    rotationDirection[0][0] = rotationVector.x;
-    rotationDirection[1][1] = rotationVector.y;
-    rotationDirection[2][2] = rotationVector.z;
-    glm::mat4 transMat = moved * oldMat * rotationDirection;
-    planet->currentTransformationMatrix = transMat;
-    for(int i = 0; planet->children[i] != 0 ; i++){
-      updatePlanet(planet->children[i],timeDelta,transMat);
-    }
+  float angle = toRadians(timeDelta) ;
+  glm::mat3 W = {
+    0, -planet->rotationDirection.z, planet->rotationDirection.y,
+    planet->rotationDirection.z, 0, - planet->rotationDirection.x,
+    - planet->rotationDirection.y, planet->rotationDirection.x,0
+  };
+  // 2 * pow(sin(angle/2),2, sin(angle) *
+
+  glm::mat3 W2 = glm::mat3(1) + glm::mat3(sin(angle)) * W +  glm::mat3(2 * pow(sin(angle/2),2))*  W * W;
+  glm::vec3 newCordinate= glm::vec3(planet->x,planet->y,planet->z) + glm::mat3(0.001) * W2 * glm::vec3(1);
+  planet->x = newCordinate.x;
+  planet->y = newCordinate.y;
+  planet->z = newCordinate.z;
+  glm::mat4 matrix = glm::mat4(1);
+  matrix[3][0] = planet->x;
+  matrix[3][1] = planet->y;
+  matrix[3][2] = planet->z;
+  glm::mat4 transMat = oldMat * matrix;
+  planet->currentTransformationMatrix = transMat;
+  for(int i = 0; i < planet->children.size() ; i++){
+    updatePlanet(planet->children[i],timeDelta,transMat);
+  }
 
 
 }
 
-// Man ganger det på bunnen først, altså tærne LOL
-
-SceneNode* generateSystem(){
+SceneNode* generateSystem(int slices, int layers){
   SceneNode* sun = createSceneNode();
   SceneNode* moon = createSceneNode();
   SceneNode* planet = createSceneNode();
@@ -123,12 +152,9 @@ SceneNode* generateSystem(){
   moon->rotationDirection = glm::vec3(1,0,0);
   planet->rotationDirection = glm::vec3(0.5,0.5,0);
   planet->rotationSpeedRadians = 2;
-  int slices = 40;
-  int layers = 40;
-  int PRIMITIVES_PER_RECTANGLE = 2;
-  int VERTICES_PER_TRIANGLE = 3;
-  int vaoid = createCircleVAO(slices,layers);
-  planet->vertexArrayObjectID = vaoid;
+  planet->vertexArrayObjectID = createCircleVAO(slices,layers,0,0,1);
+  sun->vertexArrayObjectID = createCircleVAO(slices,layers,1,0,0);
+  moon->vertexArrayObjectID = createCircleVAO(slices,layers,0,1,0);
   return sun;
 }
 

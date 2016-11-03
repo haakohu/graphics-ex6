@@ -5,7 +5,7 @@
 
 
 
-unsigned int createCircleVAO(unsigned int slices, unsigned int layers) {
+unsigned int createCircleVAO(unsigned int slices, unsigned int layers,float R, float G, float B) {
 
 	// Calculating how large our buffers have to be
 	// The sphere is defined as layers containing rectangles. Each rectangle requires us to draw two triangles
@@ -69,9 +69,9 @@ unsigned int createCircleVAO(unsigned int slices, unsigned int layers) {
 			vertices[3 * i + 0] = radius * currentDirectionX;
 			vertices[3 * i + 1] = radius * currentDirectionY;
 			vertices[3 * i + 2] = currentZ;
-			colors[4 * i + 0] = currentDirectionX;
-			colors[4 * i + 1] = 0;
-			colors[4 * i + 2] = 0;
+			colors[4 * i + 0] = R;
+			colors[4 * i + 1] = G;
+			colors[4 * i + 2] = B;
 			colors[4 * i + 3] = 1;
 
 			indices[i] = i;
@@ -80,9 +80,9 @@ unsigned int createCircleVAO(unsigned int slices, unsigned int layers) {
 			vertices[3 * i + 0] = radius * nextDirectionX;
 			vertices[3 * i + 1] = radius * nextDirectionY;
 			vertices[3 * i + 2] = currentZ;
-			colors[4 * i + 0] = 0;
-			colors[4 * i + 1] = currentDirectionX;
-			colors[4 * i + 2] = 0;
+			colors[4 * i + 0] = R;
+			colors[4 * i + 1] = G;
+			colors[4 * i + 2] = B;
 			colors[4 * i + 3] = 1;
 
 			indices[i] = i;
@@ -91,9 +91,9 @@ unsigned int createCircleVAO(unsigned int slices, unsigned int layers) {
 			vertices[3 * i + 0] = nextRadius * nextDirectionX;
 			vertices[3 * i + 1] = nextRadius * nextDirectionY;
 			vertices[3 * i + 2] = nextZ;
-			colors[4 * i + 0] = 0;
-			colors[4 * i + 1] = 1- currentDirectionY;
-			colors[4 * i + 2] = currentDirectionX;
+			colors[4 * i + 0] = R;
+			colors[4 * i + 1] = G;
+			colors[4 * i + 2] = B;
 			colors[4 * i + 3] = 1;
 
 			indices[i] = i;
@@ -104,9 +104,9 @@ unsigned int createCircleVAO(unsigned int slices, unsigned int layers) {
 			vertices[3 * i + 0] = radius * currentDirectionX;
 			vertices[3 * i + 1] = radius * currentDirectionY;
 			vertices[3 * i + 2] = currentZ;
-			colors[4 * i + 0] = 0;
-			colors[4 * i + 1] = 0;
-			colors[4 * i + 2] = 1- currentDirectionY;
+			colors[4 * i + 0] = R;
+			colors[4 * i + 1] = G;
+			colors[4 * i + 2] = B;
 			colors[4 * i + 3] = 1;
 
 			indices[i] = i;
