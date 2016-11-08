@@ -89,12 +89,18 @@ SceneNode* generateSystem(int slices, int layers){
   SceneNode* earth = createSceneNode();
   SceneNode* saturn = createSceneNode();
   SceneNode* moon1 = createSceneNode();
-  SceneNode* moon2 = createSceneNode();
+
+  SceneNode* planet3 = createSceneNode();
+  SceneNode* planet4 = createSceneNode();
+  SceneNode* planet5 = createSceneNode();
   addChild(sun,earth);
   addChild(earth,moon);
   addChild(sun,saturn);
   addChild(saturn,moon1);
-  addChild(saturn,moon2);
+
+  addChild(sun,planet3);
+  addChild(sun,planet4);
+  addChild(sun,planet5);
   sun->y = 1;
   moon->rotationSpeedRadians = 0.5;
   moon->x = 1;
@@ -116,17 +122,32 @@ SceneNode* generateSystem(int slices, int layers){
   moon1->rotationSpeedRadians= 1.5;
   moon1->scaleFactor = 0.3;
 
-  moon2->x = -1.5;
-  moon2->y = 1;
-  moon2->rotationSpeedRadians = 2;
-  moon2-> scaleFactor = 0.5;
+
+
+  planet3->x = 4;
+  planet3->y = 3;
+  planet3->rotationSpeedRadians = 3;
+  planet3->scaleFactor = 0.2;
+
+  planet4->x = -4;
+  planet4->y = -3;
+  planet4->rotationSpeedRadians=0.5;
+  planet4->scaleFactor = 0.5;
+
+  planet5->x = 3;
+  planet5->y = -2;
+  planet5->z = -4;
+  planet5->rotationSpeedRadians=1.3;
+  planet5->scaleFactor = 0.7;
 
   moon1->vertexArrayObjectID = createCircleVAO(slices,layers,0.5,0.5,1);
-  moon2->vertexArrayObjectID = createCircleVAO(slices,layers,0.3,0.8,0);
   saturn->vertexArrayObjectID = createCircleVAO(slices,layers,1,1,0);
   earth->vertexArrayObjectID = createCircleVAO(slices,layers,0,0,1);
   sun->vertexArrayObjectID = createCircleVAO(slices,layers,1,0,0);
   moon->vertexArrayObjectID = createCircleVAO(slices,layers,0,1,0);
+  planet3->vertexArrayObjectID = createCircleVAO(slices,layers,0,1,1);
+  planet4->vertexArrayObjectID = createCircleVAO(slices,layers,0.2,0.2,0.8);
+  planet5->vertexArrayObjectID = createCircleVAO(slices,layers,0.8,0.2,0.5);
   return sun;
 }
 
