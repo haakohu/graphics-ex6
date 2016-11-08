@@ -46,23 +46,21 @@ void runProgram2(GLFWwindow* window){
         shader.activate();
 
         updatePlanet(mainPlanet,getTimeDeltaSeconds(),glm::mat4x4(1));
-        std::stack<glm::mat4>* stack =  createEmptyMatrixStack();
-        pushMatrix(stack,glm::mat4(1));
-        renderPlanet(mainPlanet,vp,stack, indLen);
+        renderPlanet(mainPlanet,vp, indLen);
         shader.deactivate();
         glfwPollEvents();
         glfwSwapBuffers(window);
     }
 }
 
-void renderPlanet(SceneNode* planet, glm::mat4 vp, std::stack<glm::mat4>* stack, int indLen){
+void renderPlanet(SceneNode* planet, glm::mat4 vp, int indLen){
   glm::mat4 model = planet-> currentTransformationMatrix * glm::scale(glm::vec3(planet->scaleFactor));
   glBindVertexArray(planet->vertexArrayObjectID);
   glm::mat4 mvp = vp * model;
   glUniformMatrix4fv(3,1,GL_FALSE,&mvp[0][0]);
   glDrawElements(GL_TRIANGLES,indLen,GL_UNSIGNED_INT,0);
   for(int i= 0; i < planet->children.size(); i++){
-    renderPlanet(planet->children[i],vp,stack, indLen);
+    renderPlanet(planet->children[i],vp, indLen);
   }
 }
 
@@ -172,19 +170,19 @@ void keyboardCallback(GLFWwindow* window, int key, int scancode,
     }
     //right
     else if (key == GLFW_KEY_D && action == GLFW_PRESS){
-      cameraPosition.x = cameraPosition.x + 0.1;
+      cameraPosition.x = cameraPosition.x + 5.0;
     }
     //left
     else if (key == GLFW_KEY_A && action == GLFW_PRESS){
-      cameraPosition.x = cameraPosition.x -0.1;
+      cameraPosition.x = cameraPosition.x -5.0;
     }
     //up
     else if (key == GLFW_KEY_W && action == GLFW_PRESS){
-      cameraPosition.y = cameraPosition.y +0.1;
+      cameraPosition.y = cameraPosition.y +5.0;
     }
     //down
     else if (key == GLFW_KEY_S && action == GLFW_PRESS){
-      cameraPosition.y = cameraPosition.y-0.1;
+      cameraPosition.y = cameraPosition.y-5.0;
     }
     //forward
     else if (key == GLFW_KEY_R && action == GLFW_PRESS){
